@@ -48,7 +48,7 @@ uint16_t getAdcValue() {
     ADCSRA |= (1 << ADSC);
 
     // Wait until the conversion has finished
-    while (ADCSRA & (1 << ADSC)) {};
+    while (ADCSRA & (1 << ADSC));
 
     // Store the value as last captured
     lastCaptured = ADCL | ((uint16_t)ADCH << 8);
