@@ -8,6 +8,7 @@ void TrackingWandler(void);
 
 
 int main(void) {
+    os_initInput();
     int select = 1;
     switch(select){
         case 0:
