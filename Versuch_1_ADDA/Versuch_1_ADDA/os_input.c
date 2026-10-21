@@ -16,26 +16,31 @@
  *                      -released: 00000000
  */
 uint8_t os_getInput(void) {
-#error IMPLEMENT STH. HERE
+    return (((~PINC)>>1)&1);
 }
 
 /*!
  *  Initializes DDR and PORT for input
  */
 void os_initInput() {
-#error IMPLEMENT STH. HERE
+    DDRC &= 0b11111101;
+    PORTC |= 0b00000010;
 }
 
 /*!
  *  Endless loop as long as at least one button is pressed.
  */
 void os_waitForNoInput() {
-#error IMPLEMENT STH. HERE
+    while(os_getInput()!=0){
+
+    }
 }
 
 /*!
  *  Endless loop until at least one button is pressed.
  */
 void os_waitForInput() {
-#error IMPLEMENT STH. HERE
+    while(os_getInput()==0){
+        
+    }
 }
