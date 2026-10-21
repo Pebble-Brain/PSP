@@ -1,5 +1,4 @@
 #include "adc.h"
-
 #include "lcd.h"
 
 #include <avr/io.h>
@@ -12,7 +11,7 @@ uint16_t lastCaptured;
 uint16_t *bufferStart;
 uint8_t bufferSize;
 uint8_t bufferIndex;
-a
+
 /*! \brief This method initializes the necessary registers for using the ADC module. \n
  * Reference voltage:    internal \n
  * Input channel:        PORTA0 \n
