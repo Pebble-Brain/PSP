@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include "os_input.h"
-#include <delay.h>
+#include <util/delay.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 void manuell(void);
 void SAWandler(void);
@@ -67,7 +69,7 @@ void TrackingWandler(void){
         PORTA = ~((uint8_t)i);
         //increase the compare voltge
         PORTB = (uint8_t)i;
-        delay_ms(50);
+        _delay_ms(50);
     }
 }
 void SAWandler(void){
