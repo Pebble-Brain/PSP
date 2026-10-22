@@ -6,6 +6,9 @@
 #include "led.h"
 #include "os_input.h"
 
+#include <stdbool.h>
+#include <util/delay.h>
+
 #include <avr/io.h>
 #include <stdint.h>
 
@@ -15,7 +18,16 @@
  */
 void helloWorld(void) {
 // Repeat until ESC gets pressed
-#warning IMPLEMENT STH. HERE
+	while(true){
+		lcd_writeString("helloWorld");
+		_delay_ms(500);
+		lcd_clear();
+		_delay_ms(500);
+		if((os_getInput()&1) == 1){
+			break;
+		}
+	}
+	showMenu();
 }
 
 /*!

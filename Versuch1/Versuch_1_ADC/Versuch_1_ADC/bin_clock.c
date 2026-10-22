@@ -4,7 +4,11 @@
 #include <avr/io.h>
 
 //! Global variables
-#warning IMPLEMENT STH. HERE
+
+uint8_t hours;
+uint8_t minutes;
+uint8_t seconds;
+uint16_t milseconds;
 
 /*!
  * \return The milliseconds counter of the current time.
@@ -54,8 +58,10 @@ void initClock(void) {
     // Set compare register to 195 -> match every 10ms
     OCR0A = 195;
 
-// Init variables
-#warning IMPLEMENT STH. HERE
+	hours = 12;
+	minutes = 59;
+	seconds = 45;
+	milseconds = (uint16_t)0;
 
     // Enable timer and global interrupts
     TIMSK0 |= (1 << OCIE0A);
@@ -66,12 +72,24 @@ void initClock(void) {
  *  Updates the global variables to get a valid 12h-time
  */
 void updateClock(void){
-#warning IMPLEMENT STH. HERE
+	if(milseconds!=0){
+		return;
+	}
+	seconds = (seconds + 1)%60;
+	if(seconds!=0){
+		return;
+	}
+	minutes = (minutes+1)%60;
+	if(minutes != 0){
+		return;
+	}
+	hours = (hours%13)+1;
 }
 
 /*!
  *  ISR to increase millisecond-counter of the clock
  */
 ISR(TIMER0_COMPA_vect) {
-#warning IMPLEMENT STH. HERE
+	milseconds = (milseconds + 10)%1000;
+	updateClock();
 }
