@@ -69,7 +69,7 @@ void TrackingWandler(void){
         PORTA = ~((uint8_t)i);
         //increase the compare voltge
         PORTB = (uint8_t)i;
-        _delay_ms(50);
+        _delay_ms(100);
     }
 }
 void SAWandler(void){
@@ -89,11 +89,13 @@ void SAWandler(void){
         //set voltage to the halfpoint
         PORTB |= cur;
         PORTA &= ~cur;
+		_delay_ms(250);
         if((PINC&1) !=0){
             //if its below it we move onto the the lower half of the spectrum
             PORTB &= ~cur;
             PORTA |= cur;
         }
+		_delay_ms(250);
         cur >>=1;
     }
 }
