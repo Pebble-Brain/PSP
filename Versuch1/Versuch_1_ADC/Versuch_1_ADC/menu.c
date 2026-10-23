@@ -36,31 +36,32 @@ void helloWorld(void) {
 void displayClock(void) {
     uint16_t clockVal;
     while((os_getInput()&1) != 1){
+		clockVal = 0;
         clockVal |= getTimeSeconds();
         clockVal |= (getTimeHours()>>6);
         clockVal |= (getTimeHours()>>12);
         setLedBar(clockVal);
-        ldc_clear();
+        lcd_clear();
         if(getTimeHours()<10){
-            lcd_wrtie_char('0');
+            lcd_writeChar('0');
         }
-        lcd_writeDec(GetTimeHours());
-        lcd_wrtie_char(':');
+        lcd_writeDec(getTimeHours());
+        lcd_writeChar(':');
         if(getTimeMinutes()<10){
-            lcd_wrtie_char('0');
+            lcd_writeChar('0');
         }
-        lcd_writeDec(GetTimeMinutes());
-        lcd_wrtie_char(':');
+        lcd_writeDec(getTimeMinutes());
+        lcd_writeChar(':');
         if(getTimeSeconds()<10){
-            lcd_wrtie_char('0');
+            lcd_writeChar('0');
         }
         lcd_writeDec(getTimeSeconds());
-        lcd_wrtie_char(':');
+        lcd_writeChar(':');
         if(getTimeMilliseconds()<100){
-            lcd_wrtie_char('0');
+            lcd_writeChar('0');
         }
         if(getTimeMilliseconds()<10){
-            lcd_wrtie_char('0');
+            lcd_writeChar('0');
         }
         lcd_writeDec(getTimeMilliseconds());
     }
@@ -70,7 +71,17 @@ void displayClock(void) {
  *  Shows the stored voltage values in the second line of the display.
  */
 void displayVoltageBuffer(uint8_t displayIndex) {
-#warning IMPLEMENT STH. HERE
+	int index = displayIndex;
+	lcd_line2();
+	if(index<99){
+		lcd_writeChar('0');
+	}
+	if(index<9){
+		lcd_writeChar('0');
+	}
+	lcd_writeDec(index+1);
+	lcd_writeString("/100 ");
+	lcd_writeVoltage(getAdcValue(), 1023, 5);
 }
 
 /*!
@@ -80,27 +91,16 @@ void displayAdc(void) {
     int adcResult;
     int ledValue;
     int index=0;
-    int storedval;
     int input;
     while((os_getInput()&8)==0){
-        storedval = getStoredVoltage(index);
         adcResult = getAdcValue();
         lcd_clear();
         lcd_writeString("Voltage: ");
         lcd_writeVoltage(adcResult, 1023, 5);
-        lcd_line2();
-        if(index<99){
-            lcd_Write_char('0');
-        }
-        if(index<9){
-            lcd_write_char('0');
-        }
-        lcd_writeDec(index+1);
-        lcd_writeString("/100 ");
-        lcd_writeVoltage(storedval, 1023, 5);
+        displayVoltageBuffer(index);
         input = os_getInput();
         if((input & 1)!= 0){
-            storeVoltage(adcResult)
+            storeVoltage();
         }
         if((input&2)!= 0 && index <99){
             index ++;
