@@ -45,14 +45,17 @@ void displayClock(void) {
             lcd_wrtie_char('0');
         }
         lcd_writeDec(GetTimeHours());
+        lcd_wrtie_char(':');
         if(getTimeMinutes()<10){
             lcd_wrtie_char('0');
         }
         lcd_writeDec(GetTimeMinutes());
+        lcd_wrtie_char(':');
         if(getTimeSeconds()<10){
             lcd_wrtie_char('0');
         }
         lcd_writeDec(getTimeSeconds());
+        lcd_wrtie_char(':');
         if(getTimeMilliseconds()<100){
             lcd_wrtie_char('0');
         }
@@ -74,7 +77,21 @@ void displayVoltageBuffer(uint8_t displayIndex) {
  *  Shows the ADC value on the display and on the led bar.
  */
 void displayAdc(void) {
-#warning IMPLEMENT STH. HERE
+    int adcResult;
+    int ledValue;
+    while((os_getInput()&8)==0){
+        adcResult = getAdcValue();
+        lcd_clear();
+        lcd_writeString("Voltage: ");
+        lcd_writeVoltage(adcResult, 1023, 5);
+        _delay_ms(100);
+        ledValue = 0;
+        while(adcResult>68){
+            ledValue<<=1;
+            ledValue+=2;
+            adcResult-=68;
+        }
+    }
 }
 
 /*! \brief Starts the passed program
