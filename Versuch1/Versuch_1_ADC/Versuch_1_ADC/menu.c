@@ -23,7 +23,7 @@ void helloWorld(void) {
 		_delay_ms(500);
 		lcd_clear();
 		_delay_ms(500);
-		if((os_getInput()&1) == 1){
+		if((os_getInput()&8) != 0){
 			break;
 		}
 	}
@@ -35,12 +35,15 @@ void helloWorld(void) {
  */
 void displayClock(void) {
     uint16_t clockVal;
-    while((os_getInput()&1) != 1){
+    while((os_getInput()&8) == 0){
+		//generate clock bitstring
 		clockVal = 0;
         clockVal |= getTimeSeconds();
         clockVal |= (getTimeHours()>>6);
         clockVal |= (getTimeHours()>>12);
         setLedBar(clockVal);
+		
+		//output to lcd
         lcd_clear();
         if(getTimeHours()<10){
             lcd_writeChar('0');
@@ -65,6 +68,7 @@ void displayClock(void) {
         }
         lcd_writeDec(getTimeMilliseconds());
     }
+	showMenu();
 }
 
 /*!
@@ -81,7 +85,7 @@ void displayVoltageBuffer(uint8_t displayIndex) {
 	}
 	lcd_writeDec(index+1);
 	lcd_writeString("/100 ");
-	lcd_writeVoltage(getAdcValue(), 1023, 5);
+	lcd_writeVoltage(getStoredVoltage(index), 1023, 5);
 }
 
 /*!

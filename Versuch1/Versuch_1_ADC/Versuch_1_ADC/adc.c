@@ -11,7 +11,7 @@ uint16_t lastCaptured;
 
 uint16_t *bufferStart;
 uint8_t bufferSize = 0;
-uint8_t bufferIndex;
+uint8_t bufferIndex = 0;
 
 /*! \brief This method initializes the necessary registers for using the ADC module. \n
  * Reference voltage:    internal \n
