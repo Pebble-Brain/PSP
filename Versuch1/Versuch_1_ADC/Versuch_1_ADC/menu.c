@@ -34,7 +34,33 @@ void helloWorld(void) {
  *  Shows the clock on the display and a binary clock on the led bar.
  */
 void displayClock(void) {
-#warning IMPLEMENT STH. HERE
+    uint16_t clockVal;
+    while((os_getInput()&1) != 1){
+        clockVal |= getTimeSeconds();
+        clockVal |= (getTimeHours()>>6);
+        clockVal |= (getTimeHours()>>12);
+        setLedBar(clockVal);
+        ldc_clear();
+        if(getTimeHours()<10){
+            lcd_wrtie_char('0');
+        }
+        lcd_writeDec(GetTimeHours());
+        if(getTimeMinutes()<10){
+            lcd_wrtie_char('0');
+        }
+        lcd_writeDec(GetTimeMinutes());
+        if(getTimeSeconds()<10){
+            lcd_wrtie_char('0');
+        }
+        lcd_writeDec(getTimeSeconds());
+        if(getTimeMilliseconds()<100){
+            lcd_wrtie_char('0');
+        }
+        if(getTimeMilliseconds()<10){
+            lcd_wrtie_char('0');
+        }
+        lcd_writeDec(getTimeMilliseconds());
+    }
 }
 
 /*!

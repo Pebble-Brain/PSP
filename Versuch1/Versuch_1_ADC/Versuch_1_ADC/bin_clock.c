@@ -14,32 +14,28 @@ uint16_t milseconds;
  * \return The milliseconds counter of the current time.
  */
 uint16_t getTimeMilliseconds() {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	return milseconds;
 }
 
 /*!
  * \return The seconds counter of the current time.
  */
 uint8_t getTimeSeconds() {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	return seconds;
 }
 
 /*!
  * \return The minutes counter of the current time.
  */
 uint8_t getTimeMinutes() {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	return minutes;
 }
 
 /*!
  * \return The hour counter of the current time.
  */
 uint8_t getTimeHours() {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	return hours;
 }
 
 /*!
