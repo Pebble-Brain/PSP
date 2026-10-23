@@ -79,7 +79,7 @@ void updateClock(void){
 	if(minutes != 0){
 		return;
 	}
-	hours = (hours%13)+1;
+	hours = (hours%12)+1;
 }
 
 /*!

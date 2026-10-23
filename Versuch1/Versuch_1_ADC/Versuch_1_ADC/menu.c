@@ -39,8 +39,8 @@ void displayClock(void) {
 		//generate clock bitstring
 		clockVal = 0;
         clockVal |= getTimeSeconds();
-        clockVal |= (getTimeHours()>>6);
-        clockVal |= (getTimeHours()>>12);
+        clockVal |= (getTimeMinutes()<<6);
+        clockVal |= (getTimeHours()<<12);
         setLedBar(clockVal);
 		
 		//output to lcd
@@ -67,6 +67,7 @@ void displayClock(void) {
             lcd_writeChar('0');
         }
         lcd_writeDec(getTimeMilliseconds());
+		_delay_ms(5);
     }
 	showMenu();
 }
@@ -106,10 +107,10 @@ void displayAdc(void) {
         if((input & 1)!= 0){
             storeVoltage();
         }
-        if((input&2)!= 0 && index <99){
+        if((input&4)!= 0 && index <99){
             index ++;
         }
-        if((input&4)!= 0 && index > 0){
+        if((input&2)!= 0 && index > 0){
             index --;
         }
         _delay_ms(100);
