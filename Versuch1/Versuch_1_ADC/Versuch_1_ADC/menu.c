@@ -79,11 +79,35 @@ void displayVoltageBuffer(uint8_t displayIndex) {
 void displayAdc(void) {
     int adcResult;
     int ledValue;
+    int index=0;
+    int storedval;
+    int input;
     while((os_getInput()&8)==0){
+        storedval = getStoredVoltage(index);
         adcResult = getAdcValue();
         lcd_clear();
         lcd_writeString("Voltage: ");
         lcd_writeVoltage(adcResult, 1023, 5);
+        lcd_line2();
+        if(index<99){
+            lcd_Write_char('0');
+        }
+        if(index<9){
+            lcd_write_char('0');
+        }
+        lcd_writeDec(index+1);
+        lcd_writeString("/100 ");
+        lcd_writeVoltage(storedval, 1023, 5);
+        input = os_getInput();
+        if((input & 1)!= 0){
+            storeVoltage(adcResult)
+        }
+        if((input&2)!= 0 && index <99){
+            index ++;
+        }
+        if((input&4)!= 0 && index > 0){
+            index --;
+        }
         _delay_ms(100);
         ledValue = 0;
         while(adcResult>68){
@@ -91,6 +115,7 @@ void displayAdc(void) {
             ledValue+=2;
             adcResult-=68;
         }
+        setLedBar(ledValue);
     }
 }
 

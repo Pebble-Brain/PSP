@@ -10,7 +10,7 @@
 uint16_t lastCaptured;
 
 uint16_t *bufferStart;
-uint8_t bufferSize;
+uint8_t bufferSize = 0;
 uint8_t bufferIndex;
 
 /*! \brief This method initializes the necessary registers for using the ADC module. \n
@@ -63,8 +63,7 @@ uint16_t getAdcValue() {
  * \return The size of the buffer which stores voltage values.
  */
 uint8_t getBufferSize() {
-#warning IMPLEMENT STH. HERE
-    return 0;
+    return bufferSize;
 }
 
 /*! \brief Returns the current index of the buffer which stores voltage values.
@@ -72,15 +71,25 @@ uint8_t getBufferSize() {
  * \return The current index of the buffer which stores voltage values.
  */
 uint8_t getBufferIndex() {
-#warning IMPLEMENT STH. HERE
-    return 0;
+    return bufferIndex;
 }
 
 /*! \brief Stores the last captured voltage.
  *
  */
 void storeVoltage(void){
-#warning IMPLEMENT STH. HERE
+    lastCaptured = getAdcValue();
+    if(getBufferSize()==0){
+        //init data bank
+        bufferStart = malloc(100* sizeof(uint16_t));
+        if(bufferStart==0){
+            return;
+        }
+        bufferIndex = 0;
+        bufferSize = 100;
+    }
+    bufferStart[bufferSize] = lastCaptured;
+    bufferIndex++;
 }
 
 /*! \brief Returns the voltage value with the passed index.
@@ -89,6 +98,8 @@ void storeVoltage(void){
  * \return      The voltage value with index ind.
  */
 uint16_t getStoredVoltage(uint8_t ind) {
-#warning IMPLEMENT STH. HERE
-    return 0;
+    if(ind < bufferIndex){
+        return 0;
+    }
+    return bufferStart[ind];
 }
