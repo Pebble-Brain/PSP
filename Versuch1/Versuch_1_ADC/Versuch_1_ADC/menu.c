@@ -78,14 +78,61 @@ void displayClock(void) {
  *  Shows the stored voltage values in the second line of the display.
  */
 void displayVoltageBuffer(uint8_t displayIndex) {
-	
+	lcd_line2();
+	if(displayIndex<99){
+		lcd_writeChar('0');
+	}
+	if(displayIndex<9){
+		lcd_writeChar('0');
+	}
+	lcd_writeDec(displayIndex+1);
+	lcd_writeString("/100: ");
+	lcd_writeVoltage(getStoredVoltage(displayIndex),1023,5);
 }
 
 /*!
  *  Shows the ADC value on the display and on the led bar.
  */
 void displayAdc(void) {
-    
+	int input = 0;
+	int index = 0;
+	int voltage;
+	int ledbuffer;
+    while((input & 8) == 0){
+		//read voltage
+		voltage = getAdcValue();
+		//get input
+		input = os_getInput();
+		//write to screen
+		lcd_clear();
+		lcd_writeString("Voltage: ");
+		lcd_writeVoltage(voltage, 1023, 5);
+		//displayLEDs
+		ledbuffer=0;
+		while(voltage>68){
+			ledbuffer <<=1;
+			ledbuffer +=2;
+			voltage -=68;
+		}
+		setLedBar(ledbuffer);
+		//read inputs
+		if((input &4)!=0 && index<99){
+			index ++;
+		}
+		if((input &2)!=0 && index >0){
+			index --;
+		}
+		if((input&1)!= 0){
+			storeVoltage();
+		}
+		//display voltagebuffer
+		displayVoltageBuffer(index);
+		//delay
+		_delay_ms(100);
+	}
+	//return to menu
+	setLedBar(0);
+	showMenu();
 }
 
 /*! \brief Starts the passed program
