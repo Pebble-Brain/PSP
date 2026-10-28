@@ -16,15 +16,32 @@
  *  Hello world program.
  *  Shows the string 'Hello World!' on the display.
  */
-void helloWorld(void) {
-// Repeat until ESC gets pressed
-	while(true){
+void helloWorld(void)
+{
+	// Repeat until ESC gets pressed
+	while (true)
+	{
 		lcd_writeString("helloWorld");
-		_delay_ms(500);
+		for (uint8_t i = 0; i < 10; i++)
+		{
+			if ((os_getInput() & 8) != 0)
+			{
+				os_waitForNoInput();
+				return;
+			}
+			_delay_ms(50);
+
+		}
 		lcd_clear();
-		_delay_ms(500);
-		if((os_getInput()&8) != 0){
-			break;
+		for (uint8_t i = 0; i < 10; i++)
+		{
+			if ((os_getInput() & 8) != 0)
+			{
+				os_waitForNoInput();
+				return;
+			}
+			_delay_ms(50);
+
 		}
 	}
 	showMenu();
@@ -125,7 +142,7 @@ void displayAdc(void) {
 		if((input&1)!= 0){
 			storeVoltage();
 		}
-		//display voltagebuffer
+		//display voltage buffer
 		displayVoltageBuffer(index);
 		//delay
 		_delay_ms(100);
