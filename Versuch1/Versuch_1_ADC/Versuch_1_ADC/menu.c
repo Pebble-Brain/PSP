@@ -50,44 +50,71 @@ void helloWorld(void)
 /*!
  *  Shows the clock on the display and a binary clock on the led bar.
  */
-void displayClock(void) {
-    uint16_t clockVal;
-    while((os_getInput()&8) == 0){
-		//generate clock bitstring
-		clockVal = 0;
-        clockVal |= getTimeSeconds();
-        clockVal |= (getTimeMinutes()<<6);
-        clockVal |= (getTimeHours()<<12);
-        setLedBar(clockVal);
-		
-		//output to lcd
-        lcd_clear();
-        if(getTimeHours()<10){
-            lcd_writeChar('0');
-        }
-        lcd_writeDec(getTimeHours());
-        lcd_writeChar(':');
-        if(getTimeMinutes()<10){
-            lcd_writeChar('0');
-        }
-        lcd_writeDec(getTimeMinutes());
-        lcd_writeChar(':');
-        if(getTimeSeconds()<10){
-            lcd_writeChar('0');
-        }
-        lcd_writeDec(getTimeSeconds());
-        lcd_writeChar(':');
-        if(getTimeMilliseconds()<100){
-            lcd_writeChar('0');
-        }
-        if(getTimeMilliseconds()<10){
-            lcd_writeChar('0');
-        }
-        lcd_writeDec(getTimeMilliseconds());
-		
-		
+void displayClock(void)
+{
+	uint16_t clockVal;
+
+	// Only update the display when the time changes
+	uint8_t lastHours = 255;
+	uint8_t lastMinutes = 255;
+	uint8_t lastSeconds = 255;
+	uint16_t milliseconds;
+
+	lcd_clear();
+
+	// Draw separators
+	lcd_goto(0, 3);
+	lcd_writeChar(':');
+
+	lcd_goto(0, 6);
+	lcd_writeChar(':');
+
+	lcd_goto(0, 9);
+	lcd_writeChar(':');
+
+	while ((os_getInput() & 8) == 0)
+	{
+		// Generate clock bitstring
+		clockVal  = getTimeSeconds();
+		clockVal |= ((uint16_t)getTimeMinutes() << 6);
+		clockVal |= ((uint16_t)getTimeHours() << 12);
+
+		setLedBar(clockVal);
+
+		if (getTimeHours() != lastHours)
+		{
+			lastHours = getTimeHours();
+			lcd_goto(0, 1);
+			if (lastHours < 10) lcd_writeChar('0');
+			lcd_writeDec(lastHours);
+		}
+
+		if (getTimeMinutes() != lastMinutes)
+		{
+			lastMinutes = getTimeMinutes();
+			lcd_goto(0, 4);
+			if (lastMinutes < 10) lcd_writeChar('0');
+			lcd_writeDec(lastMinutes);
+		}
+
+		if (getTimeSeconds() != lastSeconds)
+		{
+			lastSeconds = getTimeSeconds();
+			lcd_goto(0, 7);
+			if (lastSeconds < 10) lcd_writeChar('0');
+			lcd_writeDec(lastSeconds);
+		}
+
+		lcd_goto(0, 10);
+
+		milliseconds = getTimeMilliseconds();
+		if (milliseconds < 100) lcd_writeChar('0');
+		if (milliseconds < 10) lcd_writeChar('0');
+		lcd_writeDec(milliseconds);
+
 		_delay_ms(5);
-    }
+	}
+
 	showMenu();
 }
 
