@@ -19,30 +19,26 @@
 void helloWorld(void)
 {
 	// Repeat until ESC gets pressed
+	uint8_t escPressed = 0;
 	while (true)
 	{
 		lcd_writeString("helloWorld");
+		
 		for (uint8_t i = 0; i < 10; i++)
 		{
-			if ((os_getInput() & 8) != 0)
-			{
-				os_waitForNoInput();
-				return;
-			}
+			if ((os_getInput() & 8) != 0) escPressed = 1; 
 			_delay_ms(50);
-
 		}
+		
 		lcd_clear();
+		
 		for (uint8_t i = 0; i < 10; i++)
 		{
-			if ((os_getInput() & 8) != 0)
-			{
-				os_waitForNoInput();
-				return;
-			}
+			if ((os_getInput() & 8) != 0) escPressed = 1;
 			_delay_ms(50);
-
 		}
+		
+		if (escPressed && (os_getInput()==0)) break;
 	}
 	showMenu();
 }
@@ -138,42 +134,41 @@ void displayVoltageBuffer(uint8_t displayIndex) {
  *  Shows the ADC value on the display and on the led bar.
  */
 void displayAdc(void) {
-	int input = 0;
-	int index = 0;
-	int voltage;
-	int ledbuffer;
-    while((input & 8) == 0){
-		//read voltage
-		voltage = getAdcValue();
-		//get input
+	uint8_t input = 0;
+	uint8_t index = 0;
+	uint16_t adcResult;
+	uint16_t ledValue;
+	while((input & 8) == 0){
+		// read voltage
+		adcResult = getAdcValue();
+
+		// get input
 		input = os_getInput();
-		//write to screen
+
+		// write to screen
 		lcd_clear();
 		lcd_writeString("Voltage: ");
-		lcd_writeVoltage(voltage, 1023, 5);
-		//displayLEDs
-		ledbuffer=0;
-		while(voltage>68){
-			ledbuffer <<=1;
-			ledbuffer +=2;
-			voltage -=68;
+		lcd_writeVoltage(adcResult, 1023, 5);
+
+		// display LEDs
+		ledValue=0;
+		while(adcResult>68){
+			ledValue <<=1;
+			ledValue +=2;
+			adcResult -=68;
 		}
-		setLedBar(ledbuffer);
-		//read inputs
-		if((input &4)!=0 && index<99){
-			index ++;
-		}
-		if((input &2)!=0 && index >0){
-			index --;
-		}
-		if((input&1)!= 0){
-			storeVoltage();
-		}
-		//display voltage buffer
+		setLedBar(ledValue);
+
+		// read inputs
+		if((input & 4) && index < 99) index ++;
+		if((input & 2) && index > 0) index --;
+		if(input & 1) storeVoltage();
+		//
+		// display voltage buffer
 		displayVoltageBuffer(index);
-		//delay
 		_delay_ms(100);
 	}
+
 	//return to menu
 	setLedBar(0);
 	showMenu();
