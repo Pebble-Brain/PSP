@@ -12,13 +12,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+
 //! The type for the ID of a running process.
 #error IMPLEMENT STH. HERE
 typedef ? ProcessID;
 
 //! This is the type of a program function (not the pointer to one!).
-#error IMPLEMENT STH. HERE
-typedef ? Program(?);
+typedef void Program(void);
 
 //! The type of the priority of a process.
 typedef uint8_t Priority;
@@ -49,9 +49,11 @@ typedef union StackPointer {
  *  Note that additional scheduling information (such as the current time-slice)
  *  are stored by the module that implements the actual scheduling strategies.
  */
-#error IMPLEMENT STH. HERE
-typedef struct {
-    ?
+typedef struct Process{
+    enum ProcessState state;
+	union StackPointer sp;
+	void (*program)(void);
+	Priority priority;
 } Process;
 
 /*!

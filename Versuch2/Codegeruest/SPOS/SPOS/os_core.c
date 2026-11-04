@@ -135,5 +135,17 @@ void os_init(void) {
  *  \param str  The error to be displayed
  */
 void os_errorPStr(const char *str) {
-#error IMPLEMENT STH. HERE
+	os_initInput();
+	lcd_clear();
+	lcd_writeErrorProgString(str);
+	//store current state of SERG and set MSB to 0
+	uint8_t temp = SERG;
+	SREG &= (uint8_t)0b01111111;
+	while(os_getInput()!=0b1001){
+		//busy waiting
+	}
+	while(os_getInput()!= 0){
+		//busy waiting
+	}
+	SREG = temp;
 }
