@@ -14,8 +14,7 @@
 
 
 //! The type for the ID of a running process.
-#error IMPLEMENT STH. HERE
-typedef ? ProcessID;
+typedef uint8_t ProcessID;
 
 //! This is the type of a program function (not the pointer to one!).
 typedef void Program(void);
@@ -50,8 +49,8 @@ typedef union StackPointer {
  *  are stored by the module that implements the actual scheduling strategies.
  */
 typedef struct Process{
-    enum ProcessState state;
-	union StackPointer sp;
+    ProcessState state;
+	StackPointer sp;
 	void (*program)(void);
 	Priority priority;
 } Process;

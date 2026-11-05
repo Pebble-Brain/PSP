@@ -91,7 +91,40 @@ void idle(void){
  *          defines.h on failure
  */
 ProcessID os_exec(Program *program, Priority priority) {
-#error IMPLEMENT STH. HERE
+	//find free spot on process array
+	int freePID = -1;
+	for(int i = 0; i<MAX_NUMBER_OF_PROCESSES; i++){
+		if(os_processes[i].state == OS_PS_UNUSED){
+			freePID = i;
+			break;
+		}
+	}
+	if(freePID == -1){
+		return INVALID_PROCESS;
+	}
+	
+	//check pointer
+	if(program == NULL){
+		return INVALID_PROCESS;
+	}
+	
+	//add correct values to the new process at PID i
+	os_processes[freePID].state = OS_PS_READY;
+	os_processes[freePID].program()= program;
+	os_processes[freePID].priority = priority;
+	
+	//init stack
+	uint8_t *cur = PROCESS_STACK_BOTTOM(freePID);
+	cur[0]=(uint8_t)program;
+	cur[1]=(uint8_t)(program>>8);
+	
+	for(int i =2; i<35; i++){
+		cur[i]=0;
+	}
+	
+	os_processes[freePID].sp.as_ptr=*cur[35];
+	//return pid
+	return freePID;
 }
 
 /*!
