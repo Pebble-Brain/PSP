@@ -118,14 +118,14 @@ ProcessID os_exec(Program *program, Priority priority) {
 	
 	//init stack
 	uint8_t *cur = (uint8_t *)PROCESS_STACK_BOTTOM(freePID);
-	cur[0]=(uintptr_t)program;
-	cur[1]=(uint8_t)((uintptr_t)program>>8);
+	*cur=(uintptr_t)program;
+	*(cur-1)=(uint8_t)((uintptr_t)program>>8);
 	
 	for(int i =2; i<35; i++){
-		cur[i]=0;
+		*(cur-i)=0;
 	}
 	
-	os_processes[freePID].sp.as_ptr=cur+35;
+	os_processes[freePID].sp.as_ptr=cur-35;
 	//return pid
 	return freePID;
 }
