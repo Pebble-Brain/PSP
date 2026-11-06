@@ -148,11 +148,12 @@ void os_initScheduler(void){
 		os_processes[i].state = OS_PS_UNUSED;
 	}
 	//init leerlauf process (unklar welche priority)
-	os_exec(*idle, DEFAULT_PRIORITY);
+	os_exec(idle, DEFAULT_PRIORITY);
 	
 	struct program_linked_list_node *cur = autostart_head;
 	while(cur != NULL){
-		if(cur->program == *idle){
+		if(cur->program == idle){
+			cur = cur->next;
 			continue;
 		}
 		os_exec(cur->program, DEFAULT_PRIORITY);
