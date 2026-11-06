@@ -41,7 +41,7 @@ ProcessID currentProc;
  SchedulingStrategy currentStrat;
 
 //! Count of currently nested critical sections
-#warning IMPLEMENT STH. HERE
+uint8_t criticalSectionCount;
 
 //----------------------------------------------------------------------------
 // Private function declarations
@@ -64,7 +64,28 @@ __attribute__((naked));
  *  the processor to that process.
  */
 ISR(TIMER2_COMPA_vect) {
-#warning IMPLEMENT STH. HERE
+	saveContext();
+	os_processes[currentProc].sp.as_int = (SP-35);
+	SP = BOTTOM_OF_ISR_STACK;
+	if(os_getInput()==0b1001){
+		os_waitForNoInput();
+		os_taskManMain();
+	}
+	os_processes[currentProc].state=OS_PS_READY;
+	switch (currentStrat){
+		case OS_SS_RANDOM:
+			currentProc = os_Scheduler_Random(os_processes, currentProc);
+			break;
+		case OS_SS_EVEN:
+			currentProc = os_Scheduler_Even(os_processes, currentProc);
+			break;
+		default:
+			currentProc = os_Scheduler_Even(os_processes, currentProc);
+			break;
+	}
+	os_processes[currentProc].state = OS_PS_RUNNING;
+	SP = os_processes[currentProc].sp.as_int;
+	restoreContext();
 }
 
 /*!
@@ -94,6 +115,7 @@ void idle(void){
  *          defines.h on failure
  */
 ProcessID os_exec(Program *program, Priority priority) {
+	os_enterCriticalSection();
 	//find free spot on process array
 	int freePID = -1;
 	for(int i = 0; i<MAX_NUMBER_OF_PROCESSES; i++){
@@ -103,11 +125,13 @@ ProcessID os_exec(Program *program, Priority priority) {
 		}
 	}
 	if(freePID == -1){
+		os_leaveCriticalSection();
 		return INVALID_PROCESS;
 	}
 	
 	//check pointer
 	if(program == NULL){
+		os_leaveCriticalSection();
 		return INVALID_PROCESS;
 	}
 	
@@ -126,7 +150,9 @@ ProcessID os_exec(Program *program, Priority priority) {
 	}
 	
 	os_processes[freePID].sp.as_ptr=cur-35;
+	os_processes[freePID].checksum = os_getStackChecksum(freePID);
 	//return pid
+	os_leaveCriticalSection();
 	return freePID;
 }
 
@@ -209,7 +235,11 @@ SchedulingStrategy os_getSchedulingStrategy(void) {
  *  This function supports up to 255 nested critical sections.
  */
 void os_enterCriticalSection(void) {
-#warning IMPLEMENT STH. HERE
+	uint8_t temp = SREG;
+	SREG &= 0b01111111;
+	criticalSectionCount++;
+	TIMSK2 &= ~(1<<OCIE2A);
+	SREG = temp;
 }
 
 /*!
@@ -219,7 +249,12 @@ void os_enterCriticalSection(void) {
  *  has to be reactivated.
  */
 void os_leaveCriticalSection(void){
-#warning IMPLEMENT STH. HERE
+	uint8_t temp = SREG;
+	SREG &= 0b01111111;
+	criticalSectionCount--;
+	if(criticalSectionCount==0)
+		TIMSK2 |= (1<<OCIE2A);
+	SREG = temp;
 }
 
 /*!
@@ -229,6 +264,10 @@ void os_leaveCriticalSection(void){
  *  \return The checksum of the pid'th stack.
  */
 StackChecksum os_getStackChecksum(ProcessID pid) {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	uint8_t *cur = (uint8_t*)PROCESS_STACK_BOTTOM(pid);
+	uint8_t res = 0;
+	for(int i =0; i<STACK_SIZE_PROC; i++){
+		res ^= cur[-i];
+	}
+	return res;
 }

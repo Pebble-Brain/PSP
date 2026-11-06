@@ -53,6 +53,7 @@ typedef struct Process{
 	StackPointer sp;
 	void (*program)(void);
 	Priority priority;
+	StackChecksum checksum;
 } Process;
 
 /*!
