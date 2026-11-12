@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------------
 
 //unittests
-#include "./../../../Testtasks/1.1 Unittest os_exec/progs.c"
+#include "./../../../Testtasks/1.2 Unittest os_initScheduler/progs.c"
 
 //! Program's entry point
 int main(void) {
@@ -23,7 +23,6 @@ int main(void) {
     // Wait and clear the LCD
     delayMs(600);
     lcd_clear();
-	test_os_exec();
 
     // Start the operating system
     os_startScheduler();
