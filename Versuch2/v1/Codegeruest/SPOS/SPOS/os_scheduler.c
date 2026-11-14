@@ -72,7 +72,10 @@ ISR(TIMER2_COMPA_vect) {
  *  and processor time no other process wants to have.
  */
 void idle(void){
-#warning IMPLEMENT STH. HERE
+	while(true){
+		lcd_writeChar('.');
+		delayMs(DEFAULT_OUTPUT_DELAY);
+	}
 }
 
 /*!
@@ -137,7 +140,20 @@ void os_startScheduler(void) {
  *  initialize its internal data-structures and register.
  */
 void os_initScheduler(void){
-#warning IMPLEMENT STH. HERE
+	for(int i = 0; i<MAX_NUMBER_OF_PROCESSES; i++){
+		os_processes[i].state = OS_PS_UNUSED;
+	}
+	os_exec(idle, DEFAULT_PRIORITY);
+	
+	struct program_linked_list_node *cur =	autostart_head;
+	while(cur != NULL){
+		if(cur->program == idle){
+			cur = cur->next;
+			continue;
+		}
+		os_exec(cur->program, DEFAULT_PRIORITY);
+		cur = cur->next;
+	}
 }
 
 /*!
