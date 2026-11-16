@@ -31,14 +31,14 @@
 Process os_processes[MAX_NUMBER_OF_PROCESSES];
 
 //! Index of process that is currently executed (default: idle)
-#warning IMPLEMENT STH. HERE
+ProcessID currentProc;
 
 //----------------------------------------------------------------------------
 // Private variables
 //----------------------------------------------------------------------------
 
 //! Currently active scheduling strategy
-#warning IMPLEMENT STH. HERE
+SchedulingStrategy currentSS;
 
 //! Count of currently nested critical sections
 #warning IMPLEMENT STH. HERE
@@ -64,7 +64,24 @@ __attribute__((naked));
  *  the processor to that process.
  */
 ISR(TIMER2_COMPA_vect) {
-#warning IMPLEMENT STH. HERE
+	saveContext();
+	os_processes[currentProc].sp.as_int = SP;
+	SP = BOTTOM_OF_ISR_STACK;
+	os_processes[currentProc].state=OS_PS_READY;
+	switch (currentSS){
+		case OS_SS_RANDOM:
+		currentProc = os_Scheduler_Random(os_processes, currentProc);
+		break;
+		case OS_SS_EVEN:
+		currentProc = os_Scheduler_Even(os_processes, currentProc);
+		break;
+		default:
+		currentProc = os_Scheduler_Even(os_processes, currentProc);
+		break;
+	}
+	os_processes[currentProc].state=OS_PS_RUNNING;
+	SP = os_processes[currentProc].sp.as_int;
+	restoreContext();
 }
 
 /*!
@@ -132,7 +149,10 @@ ProcessID os_exec(Program *program, Priority priority) {
  *  applications.
  */
 void os_startScheduler(void) {
-#warning IMPLEMENT STH. HERE
+	currentProc = 0;
+	os_processes[currentProc].state = OS_PS_RUNNING;
+	SP = os_processes[0].sp.as_int;
+	restoreContext();
 }
 
 /*!
@@ -172,8 +192,7 @@ Process *os_getProcessSlot(ProcessID pid) {
  *  \return The process id of the currently active process.
  */
 ProcessID os_getCurrentProc(void) {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	return currentProc;
 }
 
 /*!
@@ -182,7 +201,7 @@ ProcessID os_getCurrentProc(void) {
  *  \param strategy The strategy that will be used after the function finishes.
  */
 void os_setSchedulingStrategy(SchedulingStrategy strategy){
-#warning IMPLEMENT STH. HERE
+	currentSS = strategy;
 }
 
 /*!
@@ -191,8 +210,7 @@ void os_setSchedulingStrategy(SchedulingStrategy strategy){
  *  \return The current scheduling strategy.
  */
 SchedulingStrategy os_getSchedulingStrategy(void) {
-#warning IMPLEMENT STH. HERE
-    return OS_SS_EVEN;
+	return currentSS;
 }
 
 /*!
