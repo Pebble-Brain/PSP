@@ -227,7 +227,12 @@ SchedulingStrategy os_getSchedulingStrategy(void) {
 void os_enterCriticalSection(void) {
 	uint8_t sreg = (SREG >> 7)&1;
 	SREG &= ~(1 << 7);
-	criticalSectionCount ++;
+	if(criticalSectionCount<0xff){
+		criticalSectionCount ++;
+	}
+	else{
+		os_errorPStr(PSTR("overflow"));
+	}
 	TIMSK2 &= ~(1 << OCIE2A);
 	SREG |= (sreg << 7);
 }
@@ -243,6 +248,9 @@ void os_leaveCriticalSection(void){
 	SREG &= ~(1 << 7);
 	if(criticalSectionCount>0){
 		criticalSectionCount --;
+	}
+	else{
+		os_errorPStr(PSTR("underflow"));
 	}
 	if(criticalSectionCount == 0){
 		TIMSK2 |= (1 << OCIE2A);
