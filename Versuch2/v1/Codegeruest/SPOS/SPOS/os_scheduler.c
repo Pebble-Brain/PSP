@@ -41,7 +41,7 @@ ProcessID currentProc;
 SchedulingStrategy currentSS;
 
 //! Count of currently nested critical sections
-#warning IMPLEMENT STH. HERE
+uint8_t criticalSectionCount;
 
 //----------------------------------------------------------------------------
 // Private function declarations
@@ -111,6 +111,7 @@ void idle(void){
  *          defines.h on failure
  */
 ProcessID os_exec(Program *program, Priority priority) {
+	os_enterCriticalSection();
 	ProcessID freePID = -1;
 	for(int i=0; i<MAX_NUMBER_OF_PROCESSES; i++){
 		if(os_processes[i].state == OS_PS_UNUSED){
@@ -119,9 +120,11 @@ ProcessID os_exec(Program *program, Priority priority) {
 		}
 	}
 	if(freePID==-1){
+		os_leaveCriticalSection();
 		return INVALID_PROCESS;
 	}
 	if(program == NULL){
+		os_leaveCriticalSection();
 		return INVALID_PROCESS;
 	}
 	//add correct values to the new process at PID i
@@ -140,6 +143,7 @@ ProcessID os_exec(Program *program, Priority priority) {
 	
 	os_processes[freePID].sp.as_ptr=cur-35;
 	//return pid
+	os_leaveCriticalSection();
 	return freePID;
 }
 
@@ -221,7 +225,11 @@ SchedulingStrategy os_getSchedulingStrategy(void) {
  *  This function supports up to 255 nested critical sections.
  */
 void os_enterCriticalSection(void) {
-#warning IMPLEMENT STH. HERE
+	uint8_t sreg = (SREG >> 7)&1;
+	SREG &= ~(1 << 7);
+	criticalSectionCount ++;
+	TIMSK2 &= ~(1 << OCIE2A);
+	SREG |= (sreg << 7);
 }
 
 /*!
@@ -231,7 +239,15 @@ void os_enterCriticalSection(void) {
  *  has to be reactivated.
  */
 void os_leaveCriticalSection(void){
-#warning IMPLEMENT STH. HERE
+	uint8_t sreg = (SREG >> 7)&1;
+	SREG &= ~(1 << 7);
+	if(criticalSectionCount>0){
+		criticalSectionCount --;
+	}
+	if(criticalSectionCount == 0){
+		TIMSK2 |= (1 << OCIE2A);
+	}
+	SREG |= (sreg << 7);
 }
 
 /*!
