@@ -278,7 +278,7 @@ StackChecksum os_getStackChecksum(ProcessID pid) {
 	uint8_t *cur = (uint8_t *)PROCESS_STACK_BOTTOM(pid);
 	while(cur != os_processes[pid].sp.as_ptr){
 		res ^= *cur;
-		cur ++;
+		cur --;
 	}
 	return (StackChecksum)res;
 }
