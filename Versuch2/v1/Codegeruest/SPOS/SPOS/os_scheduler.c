@@ -67,6 +67,11 @@ ISR(TIMER2_COMPA_vect) {
 	saveContext();
 	os_processes[currentProc].sp.as_int = SP;
 	SP = BOTTOM_OF_ISR_STACK;
+	os_processes[currentProc].checksum = os_getStackChecksum(currentProc);
+	if(os_getInput()==0b1001){
+		os_waitForNoInput();
+		os_taskManMain();
+	}
 	os_processes[currentProc].state=OS_PS_READY;
 	switch (currentSS){
 		case OS_SS_RANDOM:
@@ -78,6 +83,9 @@ ISR(TIMER2_COMPA_vect) {
 		default:
 		currentProc = os_Scheduler_Even(os_processes, currentProc);
 		break;
+	}
+	if(os_getStackChecksum(currentProc)!=os_processes[currentProc].checksum){
+		os_error("invalid checksum");
 	}
 	os_processes[currentProc].state=OS_PS_RUNNING;
 	SP = os_processes[currentProc].sp.as_int;
@@ -143,6 +151,7 @@ ProcessID os_exec(Program *program, Priority priority) {
 	
 	os_processes[freePID].sp.as_ptr=cur-35;
 	//return pid
+	os_processes[freePID].checksum = os_getStackChecksum(freePID);
 	os_leaveCriticalSection();
 	return freePID;
 }
@@ -265,6 +274,11 @@ void os_leaveCriticalSection(void){
  *  \return The checksum of the pid'th stack.
  */
 StackChecksum os_getStackChecksum(ProcessID pid) {
-#warning IMPLEMENT STH. HERE
-    return 0;
+	uint8_t res = 0;
+	uint8_t *cur = (uint8_t *)PROCESS_STACK_BOTTOM(pid);
+	while(cur != os_processes[pid].sp.as_ptr){
+		res ^= *cur;
+		cur ++;
+	}
+	return (StackChecksum)res;
 }
