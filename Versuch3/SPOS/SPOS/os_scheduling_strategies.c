@@ -17,7 +17,7 @@ The file contains five strategies:
 
 #include <stdlib.h>
 
-SchedulingInformation schedulingInfo;
+SchedulingInformation schedulingInformation;
 
 /*!
  *  Reset the scheduling information for a specific strategy
@@ -29,11 +29,11 @@ SchedulingInformation schedulingInfo;
 void os_resetSchedulingInformation(SchedulingStrategy strategy) {
 	switch(strategy){
 		case OS_SS_ROUND_ROBIN:
-			schedulingInfo.timeSlice=os_getProcessSlot(os_getCurrentProc())->priority;
+			schedulingInformation.timeSlice=os_getProcessSlot(os_getCurrentProc())->priority;
 			break;
 		case OS_SS_INACTIVE_AGING:
 			for(int i =0; i<MAX_NUMBER_OF_PROCESSES; i++){
-				schedulingInfo.age[i]=0;
+				schedulingInformation.age[i]=0;
 			}
 			break;
 		default:
@@ -50,7 +50,7 @@ void os_resetSchedulingInformation(SchedulingStrategy strategy) {
  *  \param id  The process slot to erase state for
  */
 void os_resetProcessSchedulingInformation(ProcessID id){
-	schedulingInfo.age[id]=0;
+	schedulingInformation.age[id]=0;
 }
 
 /*!
@@ -64,13 +64,15 @@ void os_resetProcessSchedulingInformation(ProcessID id){
  *  \return The next process to be executed determined on the basis of the even strategy.
  */
 ProcessID os_Scheduler_Even(const Process processes[], ProcessID current) {
-	ProcessID nextfree = 0;
+	ProcessID nextfree = 0; // Default to idle if nothing else is found
+
 	for(int i = 1; i<= MAX_NUMBER_OF_PROCESSES; i++){
 		if(processes[(current+i)%MAX_NUMBER_OF_PROCESSES].state == OS_PS_READY && (current+i)%MAX_NUMBER_OF_PROCESSES != 0){
 			nextfree = (current+i)%MAX_NUMBER_OF_PROCESSES;
 			break;
 		}
 	}
+
 	return nextfree;
 }
 
@@ -83,8 +85,11 @@ ProcessID os_Scheduler_Even(const Process processes[], ProcessID current) {
  *  \return The next process to be executed determined on the basis of the random strategy.
  */
 ProcessID os_Scheduler_Random(const Process processes[], ProcessID current) {
-	uint8_t countFiltered = 0;
+	// Record how many eligible processes are found
+	uint8_t countFiltered = 0; 
 	ProcessID filtered[MAX_NUMBER_OF_PROCESSES];
+
+	// Search for eligible processes
 	for(int i = 1; i< MAX_NUMBER_OF_PROCESSES; i++){
 		if(processes[i].state==OS_PS_READY){
 			filtered[countFiltered]=i;
@@ -109,16 +114,16 @@ ProcessID os_Scheduler_Random(const Process processes[], ProcessID current) {
  *  \return The next process to be executed determined on the basis of the round robin strategy.
  */
 ProcessID os_Scheduler_RoundRobin(const Process processes[], ProcessID current) {
-    if(schedulingInfo.timeSlice>0){
-		schedulingInfo.timeSlice--;
+    if(schedulingInformation.timeSlice>0){
+		schedulingInformation.timeSlice--;
 		return current;
 	}
-	ProcessID res = os_Scheduler_Even(processes, current);
-	if(res == 0){
-		return 0;
-	}
-	schedulingInfo.timeSlice=processes[current].priority;
-	return res;
+	
+	ProcessID candidate = os_Scheduler_Even(processes, current);
+	if(candidate == 0) return 0;
+	
+	schedulingInformation.timeSlice=processes[current].priority;
+	return candidate;
 }
 
 /*!
@@ -133,29 +138,27 @@ ProcessID os_Scheduler_RoundRobin(const Process processes[], ProcessID current) 
  *  \return The next process to be executed, determined based on the inactive-aging strategy.
  */
 ProcessID os_Scheduler_InactiveAging(const Process processes[], ProcessID current) {
-	ProcessID res = 0;
-	uint8_t maxage = 0;
-	uint8_t maxprio = 0;
-    for(int i=1; i<MAX_NUMBER_OF_PROCESSES; i++){
-		if(processes[i].state == OS_PS_READY){
-			schedulingInfo.age[i]+=processes[i].priority;
-			if(schedulingInfo.age[i]==maxage){
-				if(processes[i].priority>maxprio){
-					maxprio = processes[i].priority;
-					maxage = schedulingInfo.age[i];
-					res = i;
-					continue;
-				}
-			}
-			if(schedulingInfo.age[i]>maxage){
-				maxprio = processes[i].priority;
-				maxage = schedulingInfo.age[i];
-				res = i;
-			}
-		}
-	}
-	schedulingInfo.age[res]=0;
-	return res;
+    ProcessID candidate = 0;
+    uint16_t highestAge = 0;  // Use uint16_t to avoid overflow
+    uint8_t highestPriority = 0;
+    
+    for(int i = 1; i < MAX_NUMBER_OF_PROCESSES; i++) {
+        if(processes[i].state == OS_PS_READY) {
+			// Age every process
+            schedulingInformation.age[i] += processes[i].priority;
+            
+            // If any of the three conditions are true, select as a candidate
+            if(schedulingInformation.age[i] > highestAge || // If it the oldest
+               (schedulingInformation.age[i] == highestAge && processes[i].priority > highestPriority) || // If it is equally as old but lower priority
+               (schedulingInformation.age[i] == highestAge && processes[i].priority == highestPriority && i < candidate)) { // If it has both equal age and priority but lower PID
+                highestAge = schedulingInformation.age[i];
+                highestPriority = processes[i].priority;
+                candidate = i;
+            }
+        }
+    }
+    schedulingInformation.age[candidate] = 0;
+    return candidate;
 }
 
 /*!
