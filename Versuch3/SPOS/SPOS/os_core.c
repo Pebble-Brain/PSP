@@ -11,8 +11,11 @@
 
 void os_initScheduler(void);
 
-// variable for saving the original MCUSR so that we can examine it later
+// Variable for saving the original MCUSR so that we can examine it later
 uint8_t savedMCUSR __attribute__((section(".noinit")));
+
+// First free byte after global variables
+extern uint8_t const __heap_start;
 
 /*! \file
  *
@@ -119,6 +122,9 @@ void os_init(void) {
     lcd_init();
     stdout = lcdout;
     stderr = lcdout;
+
+    // Check if heap allocation is possible
+    if(__heap_start > HEAPOFFSET) lcd_writeProgString(PSTR("Heap allocation failed"));
 
     lcd_writeProgString(PSTR("Booting SPOS ..."));
     os_checkResetSource(OS_ALLOWED_RESET_SOURCES);

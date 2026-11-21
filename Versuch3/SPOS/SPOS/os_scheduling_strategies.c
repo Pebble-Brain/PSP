@@ -157,7 +157,7 @@ ProcessID os_Scheduler_InactiveAging(const Process processes[], ProcessID curren
             }
         }
     }
-    schedulingInformation.age[candidate] = 0;
+    schedulingInformation.age[candidate] = 0; // Set age of next active process to 0
     return candidate;
 }
 

@@ -52,6 +52,9 @@
 #define DEFAULT_OUTPUT_DELAY 100
 #endif
 
+// Memory offset of heap start from 0x100
+#define HEAPOFFSET 200
+
 //----------------------------------------------------------------------------
 // Scheduler constants
 //----------------------------------------------------------------------------
