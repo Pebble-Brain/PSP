@@ -12,4 +12,36 @@
 #include "os_mem_drivers.h"
 #include <stddef.h>
 
+
+//! The structure of a heap driver which consists of a low level memory driver and heap specific information such as start, size etc...
+#define intHeap (&intHeap__)
+typedef struct Heap {
+    MemDriver driver;
+    size_t startMap;
+    size_t sizeMap;
+    size_t sizePayload;
+    AllocStrategy strategy;
+    char const *name;
+} Heap;
+
+//! All available heap allocation strategies
+typedef enum AllocStrategy {
+    OS_MEM_FIRST,
+    OS_MEM_NEXT,
+    OS_MEM_BEST,
+    OS_MEM_WORST,
+} AllocStrategy;
+
+//! This function clears the Heapmap of a specific heap.
+void os_initHeap (Heap *heap);
+
+//! Initialises all Heaps.
+void os_initHeaps ();
+
+//! Needed for Taskmanager interaction.
+Heap* os_lookupHeap (uint8_t index);
+
+//! Needed for Taskmanager interaction.
+size_t 	os_getHeapListLength (void);
+
 #endif
