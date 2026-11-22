@@ -17,7 +17,7 @@ The file contains five strategies:
 
 #include <stdlib.h>
 
-SchedulingInformation schedulingInformation;
+SchedulingInformation schedulingInfo;
 
 /*!
  *  Reset the scheduling information for a specific strategy
@@ -29,11 +29,11 @@ SchedulingInformation schedulingInformation;
 void os_resetSchedulingInformation(SchedulingStrategy strategy) {
 	switch(strategy){
 		case OS_SS_ROUND_ROBIN:
-			schedulingInformation.timeSlice=os_getProcessSlot(os_getCurrentProc())->priority;
+			schedulingInfo.timeSlice=os_getProcessSlot(os_getCurrentProc())->priority;
 			break;
 		case OS_SS_INACTIVE_AGING:
 			for(int i =0; i<MAX_NUMBER_OF_PROCESSES; i++){
-				schedulingInformation.age[i]=0;
+				schedulingInfo.age[i]=0;
 			}
 			break;
 		default:
@@ -50,7 +50,7 @@ void os_resetSchedulingInformation(SchedulingStrategy strategy) {
  *  \param id  The process slot to erase state for
  */
 void os_resetProcessSchedulingInformation(ProcessID id){
-	schedulingInformation.age[id]=0;
+	schedulingInfo.age[id]=0;
 }
 
 /*!
@@ -115,14 +115,14 @@ ProcessID os_Scheduler_Random(const Process processes[], ProcessID current) {
  */
 ProcessID os_Scheduler_RoundRobin(const Process processes[], ProcessID current) {
     if(schedulingInformation.timeSlice>0){
-		schedulingInformation.timeSlice--;
+		schedulingInfo.timeSlice--;
 		return current;
 	}
 	
 	ProcessID candidate = os_Scheduler_Even(processes, current);
 	if(candidate == 0) return 0;
 	
-	schedulingInformation.timeSlice=processes[current].priority;
+	schedulingInfo.timeSlice=processes[current].priority;
 	return candidate;
 }
 
@@ -145,19 +145,19 @@ ProcessID os_Scheduler_InactiveAging(const Process processes[], ProcessID curren
     for(int i = 1; i < MAX_NUMBER_OF_PROCESSES; i++) {
         if(processes[i].state == OS_PS_READY) {
 			// Age every process
-            schedulingInformation.age[i] += processes[i].priority;
+            schedulingInfo.age[i] += processes[i].priority;
             
             // If any of the three conditions are true, select as a candidate
-            if(schedulingInformation.age[i] > highestAge || // If it the oldest
-               (schedulingInformation.age[i] == highestAge && processes[i].priority > highestPriority) || // If it is equally as old but lower priority
-               (schedulingInformation.age[i] == highestAge && processes[i].priority == highestPriority && i < candidate)) { // If it has both equal age and priority but lower PID
-                highestAge = schedulingInformation.age[i];
+            if(schedulingInfo.age[i] > highestAge || // If it the oldest
+               (schedulingInfo.age[i] == highestAge && processes[i].priority > highestPriority) || // If it is equally as old but lower priority
+               (schedulingInfo.age[i] == highestAge && processes[i].priority == highestPriority && i < candidate)) { // If it has both equal age and priority but lower PID
+                highestAge = schedulingInfo.age[i];
                 highestPriority = processes[i].priority;
                 candidate = i;
             }
         }
     }
-    schedulingInformation.age[candidate] = 0; // Set age of next active process to 0
+    schedulingInfo.age[candidate] = 0; // Set age of next active process to 0
     return candidate;
 }
 
