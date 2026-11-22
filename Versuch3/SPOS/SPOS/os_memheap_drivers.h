@@ -14,15 +14,17 @@
 
 
 //! The structure of a heap driver which consists of a low level memory driver and heap specific information such as start, size etc...
-#define intHeap (&intHeap__)
 typedef struct Heap {
     MemDriver driver;
     size_t startMap;
     size_t sizeMap;
     size_t sizePayload;
     AllocStrategy strategy;
-    char const *name;
+    char const* name;
 } Heap;
+
+//! Macro to get pointer to the intHeap__ instance
+#define intHeap (&intHeap__)
 
 //! All available heap allocation strategies
 typedef enum AllocStrategy {
