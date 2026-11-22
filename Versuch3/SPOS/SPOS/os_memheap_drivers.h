@@ -11,6 +11,7 @@
 
 #include "os_mem_drivers.h"
 #include <stddef.h>
+#include <avr/pgmspace.h>
 
 
 //! The structure of a heap driver which consists of a low level memory driver and heap specific information such as start, size etc...
@@ -20,7 +21,7 @@ typedef struct Heap {
     size_t sizeMap;
     size_t sizePayload;
     AllocStrategy strategy;
-    char const* name;
+    char PROGMEM const* name;
 } Heap;
 
 //! Macro to get pointer to the intHeap__ instance
