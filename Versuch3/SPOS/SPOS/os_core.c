@@ -128,7 +128,7 @@ void os_init(void) {
     initMemoryDevices();
 
     // Check if heap allocation is possible
-    if((uint16_t)&__heap_start < HEAPOFFSET) {
+    if((uint16_t)&__heap_start < (HEAPOFFSET + AVR_SRAM_START)) {
         os_errorPStr(PSTR("Heap too low"));
     }
 

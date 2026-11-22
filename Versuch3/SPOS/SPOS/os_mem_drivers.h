@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 //! Realises a pointer to the MemDriver intSRAM__.
+extern MemDriver intSRAM__;
 #define intSRAM (&intSRAM__)
 
 //! Type used instead of uint8_t* pointers to avoid direct dereferencing.
