@@ -53,7 +53,7 @@
 #endif
 
 // Memory offset of heap start from 0x100
-#define HEAPOFFSET 200
+#define HEAPOFFSET 250
 
 //----------------------------------------------------------------------------
 // Scheduler constants

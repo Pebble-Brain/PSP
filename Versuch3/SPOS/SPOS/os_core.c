@@ -1,8 +1,9 @@
 #include "os_core.h"
-
 #include "defines.h"
+
 #include "lcd.h"
 #include "os_input.h"
+#include "os_memheap_drivers.h"
 #include "util.h"
 
 #include <avr/interrupt.h>
@@ -123,8 +124,13 @@ void os_init(void) {
     stdout = lcdout;
     stderr = lcdout;
 
+    // Init memory
+    initMemoryDevices();
+
     // Check if heap allocation is possible
-    if(__heap_start > HEAPOFFSET) lcd_writeProgString(PSTR("Heap allocation failed"));
+    if((uint16_t)&__heap_start < HEAPOFFSET) {
+        os_errorPStr(PSTR("Heap too low"));
+    }
 
     lcd_writeProgString(PSTR("Booting SPOS ..."));
     os_checkResetSource(OS_ALLOWED_RESET_SOURCES);
