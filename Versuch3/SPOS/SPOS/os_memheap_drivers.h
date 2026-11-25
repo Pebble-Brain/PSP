@@ -13,6 +13,9 @@
 #include <stddef.h>
 #include <avr/pgmspace.h>
 
+//! Number of implemented heaps
+#define NUM_HEAPS 1
+
 //! Macro to get pointer to the intHeap__ instance
 #define intHeap (&intHeap__)
 
@@ -35,7 +38,7 @@ typedef enum AllocStrategy {
 
 //! The structure of a heap driver which consists of a low level memory driver and heap specific information such as start, size etc...
 typedef struct Heap {
-    MemDriver driver;
+    MemDriver* driver;
     size_t startMap;
     size_t sizeMap;
     size_t sizePayload;
@@ -53,6 +56,6 @@ void os_initHeaps ();
 Heap* os_lookupHeap (uint8_t index);
 
 //! Needed for Taskmanager interaction.
-size_t 	os_getHeapListLength (void);
+uint8_t os_getHeapListLength (void);
 
 #endif
