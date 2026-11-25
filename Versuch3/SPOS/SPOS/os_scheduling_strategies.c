@@ -114,16 +114,16 @@ ProcessID os_Scheduler_Random(const Process processes[], ProcessID current) {
  *  \return The next process to be executed determined on the basis of the round robin strategy.
  */
 ProcessID os_Scheduler_RoundRobin(const Process processes[], ProcessID current) {
-    if(schedulingInfo.timeSlice>0){
-		schedulingInfo.timeSlice--;
-		return current;
-	}
-	
-	ProcessID candidate = os_Scheduler_Even(processes, current);
-	if(candidate == 0) return 0;
-	
-	schedulingInfo.timeSlice=processes[current].priority;
-	return candidate;
+    if (schedulingInfo.timeSlice > 1) { // Note: timeslice is not zero indexed
+        schedulingInfo.timeSlice--;
+        return current;
+    }
+    
+    ProcessID candidate = os_Scheduler_Even(processes, current);
+    if (candidate == 0) return 0;
+    
+    schedulingInfo.timeSlice = processes[candidate].priority;
+    return candidate;
 }
 
 /*!
