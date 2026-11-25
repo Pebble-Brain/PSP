@@ -325,5 +325,10 @@ bool os_kill(ProcessID pid) {
 This wrapper enables the possibility to perfom a few necessary steps after the actual process function has finished.
 */
 void os_dispatcher (void) {
-	
+	ProcessID pid = os_getCurrentProc();
+	Program *program = os_processes[pid].program;
+
+	program();
+
+	os_kill(pid);
 }
