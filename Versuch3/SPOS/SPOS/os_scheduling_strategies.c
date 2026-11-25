@@ -114,7 +114,7 @@ ProcessID os_Scheduler_Random(const Process processes[], ProcessID current) {
  *  \return The next process to be executed determined on the basis of the round robin strategy.
  */
 ProcessID os_Scheduler_RoundRobin(const Process processes[], ProcessID current) {
-    if(schedulingInformation.timeSlice>0){
+    if(schedulingInfo.timeSlice>0){
 		schedulingInfo.timeSlice--;
 		return current;
 	}

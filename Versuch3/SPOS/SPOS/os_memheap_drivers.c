@@ -15,7 +15,7 @@ Heap intHeap__ = {
     .sizeMap = HEAP_MAP_SIZE,
     .sizePayload = HEAP_PAYLOAD_SIZE,
     .strategy = OS_MEM_FIRST,
-    .name = "mainHeap"
+    .name = "SRAMHeap"
 };
 
 //! Number of heaps in the system

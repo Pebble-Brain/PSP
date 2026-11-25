@@ -28,7 +28,7 @@ static MemValue getHighNibble (const Heap *heap, MemAddr addr) {
     return (heap->driver->read(addr) >> 4);
 }
 
-static void setHighNibble(Heap *heap, MemAddr addr, MemValue value) {
+static void setHighNibble(const Heap *heap, MemAddr addr, MemValue value) {
     MemValue current = heap->driver->read(addr);
     MemValue updated = (current & 0x0F) | (value << 4);
     heap->driver->write(addr, updated);
@@ -38,7 +38,7 @@ static MemValue getLowNibble (const Heap *heap, MemAddr addr) {
     return (heap->driver->read(addr) & 0x0F);
 }
 
-static void setLowNibble(Heap *heap, MemAddr addr, MemValue value) {
+static void setLowNibble(const Heap *heap, MemAddr addr, MemValue value) {
     MemValue current = heap->driver->read(addr);
     MemValue updated = (current & 0xF0) | (0x0F & value);
     heap->driver->write(addr, updated);
@@ -52,16 +52,13 @@ static void setLowNibble(Heap *heap, MemAddr addr, MemValue value) {
  */
 static void setMapEntry(const Heap *heap, MemAddr addr, MemValue value) {
     MemAddr useStart = os_getUseStart(heap);
-    MemAddr offset   = addr - useStart;
-    MemAddr mapAddr  = os_getMapStart(heap) + (offset / 2);
+    MemAddr offset = addr - useStart;
+    MemAddr mapAddr = os_getMapStart(heap) + (offset / 2);
 
-    switch (offset % 2) {
-        case 0: // Fill the high nibble first
-            setHighNibble(heap, mapAddr, value);
-            break;
-        case 1:
-            setLowNibble(heap, mapAddr, value);
-            break;
+    if (offset % 2) {
+        setLowNibble(heap, mapAddr, value);
+    } else {
+        setHighNibble(heap, mapAddr, value);
     }
 }
 
@@ -72,27 +69,51 @@ static void setMapEntry(const Heap *heap, MemAddr addr, MemValue value) {
  */
 MemValue os_getMapEntry	(const Heap* heap, MemAddr addr) {
     MemAddr useStart = os_getUseStart(heap);
-    MemAddr offset   = addr - useStart;
-    MemAddr mapAddr  = os_getMapStart(heap) + (offset / 2);
+    MemAddr offset = addr - useStart;
+    MemAddr mapAddr = os_getMapStart(heap) + (offset / 2);
 
-    switch (offset % 2) {
-        case 0:
-            getHighNibble(heap, mapAddr);
-            break;
-        case 1:
-            getLowNibble(heap, mapAddr););
-            break;
-    }
-
-}
-//!  Get the size of a chunk on a given address.
-uint16_t os_getChunkSize(const Heap *heap, MemAddr addr) {
-
+    if (offset % 2) {
+        return getLowNibble(heap, mapAddr);
+    } else {
+        return getHighNibble(heap, mapAddr);
+    }      
 }
 
-//!  Get the address of the first byte of chunk.
+/*! \brief This function is used to determine where a chunk starts if a given address might not point to the start of the chunk but to some place inside of it.
+ *
+ *  \param heap	The heap the chunk is on hand in
+ *  \param addr	The address that points to some byte of the chunk
+ */
 MemAddr os_getFirstByteOfChunk(const Heap *heap, MemAddr addr) {
+    MemAddr useStart = os_getUseStart(heap);
+    MemAddr useEnd = useStart + os_getUseSize(heap);
 
+    // Check that the payload address is valid and does point to a chunk
+    if (addr < useStart || addr >= useEnd) return 0;
+    if (os_getMapEntry(heap, addr) == 0x0) return 0;
+
+    // Decrement the address until is no longer a continuation, or reaches the start of the heap
+    MemAddr candidate = addr;
+    while (candidate > useStart && os_getMapEntry(heap, candidate) == 0xF) candidate--;
+    return candidate;
+}
+
+/*! \brief Takes a use-pointer and computes the length of the chunk. This only works for occupied chunks. The size of free chunks is always 0.
+ *
+ *  \param heap	The heap to be used
+ *  \param addr	The address that points to some byte of the chunk
+ */uint16_t os_getChunkSize(const Heap *heap, MemAddr addr) {
+    MemAddr useStart = os_getUseStart(heap);
+    MemAddr useEnd = useStart + os_getUseSize(heap);
+
+    // Check that the payload address is valid and does point to a chunk
+    MemAddr start = os_getFirstByteOfChunk(heap, addr);
+    if (start == 0) return 0;
+
+    // Incrementfd the address until is no longer a continuation, or reaches the start of the heap
+    MemAddr end = addr + 1;
+    while (end < useEnd && os_getMapEntry(heap, end) == 0xF) end++;
+    return end - start;
 }
 
 //!  Changes the memory management strategy.
