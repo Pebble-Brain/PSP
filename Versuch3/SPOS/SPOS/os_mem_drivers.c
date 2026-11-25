@@ -1,7 +1,7 @@
 #include "os_mem_drivers.h"
 #include "defines.h"
 
-static void initSRAM_internal(void);
+static void initSRAM_internal(void) {};
 
 /*! \brief Reads a single byte from the specified SRAM address.
  *
@@ -25,12 +25,12 @@ static void writeSRAM_internal (MemAddr addr, MemValue value) {
 }
 
 /*! \brief Memory driver instance for the internal SRAM.
- *  Note the initialisation is not strictly necessary.
+ *  
  */
 MemDriver intSRAM__ = {
-    initSRAM_internal,
-    readSRAM_internal,
-    writeSRAM_internal
+    .init = initSRAM_internal,
+    .read = readSRAM_internal,
+    .write = writeSRAM_internal
 };
 
 /*! \brief Initializes all memory devices.
@@ -38,5 +38,5 @@ MemDriver intSRAM__ = {
  *  This function calls the init function of each registered memory driver.
  */
 void initMemoryDevices() {
-    intSRAM->init;
+    intSRAM->init();
 }

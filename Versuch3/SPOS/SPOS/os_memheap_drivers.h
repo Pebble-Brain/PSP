@@ -13,19 +13,17 @@
 #include <stddef.h>
 #include <avr/pgmspace.h>
 
-
-//! The structure of a heap driver which consists of a low level memory driver and heap specific information such as start, size etc...
-typedef struct Heap {
-    MemDriver driver;
-    size_t startMap;
-    size_t sizeMap;
-    size_t sizePayload;
-    AllocStrategy strategy;
-    char PROGMEM const* name;
-} Heap;
-
 //! Macro to get pointer to the intHeap__ instance
 #define intHeap (&intHeap__)
+
+//! Total heap size (space between heap start and process stack bottom)
+#define HEAP_TOTAL_SIZE (BOTTOM_OF_PROCS_STACK - (HEAPOFFSET + AVR_SRAM_START))
+
+//! Map area size (1/3 of total, using integer division)
+#define HEAP_MAP_SIZE (HEAP_TOTAL_SIZE / 3)
+
+//! Payload area size (remaining 2/3 of total)
+#define HEAP_PAYLOAD_SIZE (HEAP_TOTAL_SIZE - HEAP_MAP_SIZE)
 
 //! All available heap allocation strategies
 typedef enum AllocStrategy {
@@ -34,6 +32,16 @@ typedef enum AllocStrategy {
     OS_MEM_BEST,
     OS_MEM_WORST,
 } AllocStrategy;
+
+//! The structure of a heap driver which consists of a low level memory driver and heap specific information such as start, size etc...
+typedef struct Heap {
+    MemDriver driver;
+    size_t startMap;
+    size_t sizeMap;
+    size_t sizePayload;
+    AllocStrategy strategy;
+    char const* name;
+} Heap;
 
 //! This function clears the Heapmap of a specific heap.
 void os_initHeap (Heap *heap);

@@ -11,10 +11,6 @@
 
 #include <stdint.h>
 
-//! Realises a pointer to the MemDriver intSRAM__.
-extern MemDriver intSRAM__;
-#define intSRAM (&intSRAM__)
-
 //! Type used instead of uint8_t* pointers to avoid direct dereferencing.
 typedef uint16_t MemAddr; 
 
@@ -36,6 +32,10 @@ typedef struct MemDriver {
     MemoryReadHnd read;
     MemoryWriteHnd write;
 } MemDriver;
+
+//! Realises a pointer to the MemDriver intSRAM__.
+extern MemDriver intSRAM__;
+#define intSRAM (&intSRAM__)
 
 //! Initialise all memory devices.
 void initMemoryDevices();
