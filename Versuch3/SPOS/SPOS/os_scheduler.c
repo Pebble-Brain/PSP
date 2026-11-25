@@ -8,14 +8,14 @@
  */
 
 #include "os_scheduler.h"
-
 #include "lcd.h"
 #include "os_core.h"
 #include "os_input.h"
+#include "os_memheap_drivers.h"
+#include "os_memory.h"
 #include "os_scheduling_strategies.h"
 #include "os_taskman.h"
 #include "util.h"
-
 #include <avr/interrupt.h>
 #include <stdbool.h>
 
@@ -293,4 +293,37 @@ StackChecksum os_getStackChecksum(ProcessID pid) {
 		cur --;
 	}
 	return (StackChecksum)res;
+}
+
+/*!
+ *  Kills a process by cleaning up the corresponding slot in os_processes.
+ *  It also calls the garbage collection in order to free any memory that has been allocated by the killed process.
+ *
+ *  \param pid The ProcessID of the process to be killed
+ *  \return True, if the killing process was successful
+ */
+bool os_kill(ProcessID pid) {
+	// Prevent termination of idle process
+	if (pid == 0) return false;
+
+	os_enterCriticalSection();
+	os_processes[pid].state = OS_PS_UNUSED;	// Clear process state
+	os_freeProcessMemory(intHeap, pid); // Clear heap
+
+    if (pid == os_getCurrentProc()) { // For self-terminating processes
+        while (criticalSectionCount > 0) os_leaveCriticalSection(); // Unwind all critical sections
+        while (1); // Wait until another process is scheduled
+    } else {
+        // Terminating another process: preserve caller's outer critical sections
+        os_leaveCriticalSection();
+    }
+
+	return true;
+}
+
+/*! Encapsulates any running process in order make it possible for processes to terminate
+This wrapper enables the possibility to perfom a few necessary steps after the actual process function has finished.
+*/
+void os_dispatcher (void) {
+	
 }

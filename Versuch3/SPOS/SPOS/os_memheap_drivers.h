@@ -16,9 +16,6 @@
 //! Number of implemented heaps
 #define NUM_HEAPS 1
 
-//! Macro to get pointer to the intHeap__ instance
-#define intHeap (&intHeap__)
-
 //! Total heap size (space between heap start and process stack bottom)
 #define HEAP_TOTAL_SIZE (BOTTOM_OF_PROCS_STACK - (HEAPOFFSET + AVR_SRAM_START))
 
@@ -45,6 +42,10 @@ typedef struct Heap {
     AllocStrategy strategy;
     char const* name;
 } Heap;
+
+//! Macro to get pointer to the intHeap__ instance
+Heap intHeap__;
+#define intHeap (&intHeap__)
 
 //! This function clears the Heapmap of a specific heap.
 void os_initHeap (Heap *heap);

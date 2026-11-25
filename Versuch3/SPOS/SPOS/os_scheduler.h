@@ -65,4 +65,6 @@ void os_enterCriticalSection(void);
 //! Leaves a critical code section
 void os_leaveCriticalSection(void);
 
+//! Used to kill a running process and clear the corresponding process slot.
+bool os_kill (ProcessID pid);
 #endif
