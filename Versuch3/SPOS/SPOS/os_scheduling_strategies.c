@@ -66,7 +66,7 @@ void os_resetProcessSchedulingInformation(ProcessID id){
 ProcessID os_Scheduler_Even(const Process processes[], ProcessID current) {
 	ProcessID nextfree = 0; // Default to idle if nothing else is found
 
-	for(int i = 1; i<= MAX_NUMBER_OF_PROCESSES; i++){
+for(int i = 1; i < MAX_NUMBER_OF_PROCESSES; i++){
 		if(processes[(current+i)%MAX_NUMBER_OF_PROCESSES].state == OS_PS_READY && (current+i)%MAX_NUMBER_OF_PROCESSES != 0){
 			nextfree = (current+i)%MAX_NUMBER_OF_PROCESSES;
 			break;

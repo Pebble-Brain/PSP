@@ -51,6 +51,9 @@ uint8_t criticalSectionCount;
 ISR(TIMER2_COMPA_vect)
 __attribute__((naked));
 
+//! Wraps the execution of a program to clean up the process after it has finished
+void os_dispatcher(void);
+
 //----------------------------------------------------------------------------
 // Function definitions
 //----------------------------------------------------------------------------
@@ -153,8 +156,8 @@ ProcessID os_exec(Program *program, Priority priority) {
 	
 	//init stack
 	uint8_t *cur = (uint8_t *)PROCESS_STACK_BOTTOM(freePID);
-	*cur=(uintptr_t)program;
-	*(cur-1)=(uint8_t)((uintptr_t)program>>8);
+	*cur=(uintptr_t)os_dispatcher;
+	*(cur-1)=(uint8_t)((uintptr_t)os_dispatcher>>8);
 	
 	for(int i =2; i<35; i++){
 		*(cur-i)=0;
