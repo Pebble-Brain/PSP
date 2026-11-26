@@ -16,8 +16,8 @@
 //! Number of implemented heaps
 #define NUM_HEAPS 1
 
-//! Total heap size (space between heap start and process stack bottom)
-#define HEAP_TOTAL_SIZE (BOTTOM_OF_PROCS_STACK - (HEAPOFFSET + AVR_SRAM_START))
+//! Total heap size, rounded down to keep the heap below the process stacks.
+#define HEAP_TOTAL_SIZE LOWEST_PROCESS_STACK_ADDRESS - (HEAPOFFSET + AVR_SRAM_START)
 
 //! Map area size (1/3 of total, using integer division)
 #define HEAP_MAP_SIZE (HEAP_TOTAL_SIZE / 3)

@@ -138,6 +138,7 @@ MemAddr os_malloc (Heap* heap, size_t size) {
     ProcessID pid = os_getCurrentProc();
     MemAddr start = 0;
 
+    // Allocation strategy switch statement
     switch (os_getAllocationStrategy(heap)) {
         case OS_MEM_FIRST:
             start = os_Memory_FirstFit(heap, size);
@@ -173,7 +174,9 @@ MemAddr os_malloc (Heap* heap, size_t size) {
 void os_freeOwnerRestricted (Heap* heap, MemAddr addr, ProcessID owner) {
     os_enterCriticalSection();
     MemAddr start = os_getFirstByteOfChunk(heap, addr);
+
     size_t size = os_getChunkSize(heap, start);
+    size_t end = start + size;
 
     // Verify that the chunk belongs to the process
     if(os_getMapEntry(heap, start) != owner) {
@@ -181,7 +184,7 @@ void os_freeOwnerRestricted (Heap* heap, MemAddr addr, ProcessID owner) {
         return;
     }
 
-    for (MemAddr index = start; index < start + size; index++) {
+    for (MemAddr index = start; index < end; index++) {
         setMapEntry(heap, index, 0); // Clear map bytes
     }
 

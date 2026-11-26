@@ -84,6 +84,9 @@
 //! The bottom of the memory chunks for all process stacks. That is the highest address.
 #define BOTTOM_OF_PROCS_STACK (BOTTOM_OF_ISR_STACK - STACK_SIZE_ISR)
 
+//! The lowest address occupied by a process stack.
+#define LOWEST_PROCESS_STACK_ADDRESS (BOTTOM_OF_PROCS_STACK - (MAX_NUMBER_OF_PROCESSES * STACK_SIZE_PROC) + 1)
+
 //! The bottom of the memory chunk with number PID.
 #define PROCESS_STACK_BOTTOM(PID) (BOTTOM_OF_PROCS_STACK - ((PID)*STACK_SIZE_PROC))
 
