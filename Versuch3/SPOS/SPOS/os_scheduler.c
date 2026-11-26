@@ -133,14 +133,19 @@ void idle(void){
  */
 ProcessID os_exec(Program *program, Priority priority) {
 	os_enterCriticalSection();
-	ProcessID freePID = -1;
+	
+	ProcessID freePID = INVALID_PROCESS;
+	
+	// Search for free slot
 	for(int i=0; i<MAX_NUMBER_OF_PROCESSES; i++){
 		if(os_processes[i].state == OS_PS_UNUSED){
-			freePID = i;
+			freePID = (ProcessID)i;
 			break;
 		}
 	}
-	if(freePID==-1){
+	
+	// Parameter checks
+	if(freePID == INVALID_PROCESS){
 		os_leaveCriticalSection();
 		return INVALID_PROCESS;
 	}
@@ -148,24 +153,31 @@ ProcessID os_exec(Program *program, Priority priority) {
 		os_leaveCriticalSection();
 		return INVALID_PROCESS;
 	}
-	//add correct values to the new process at PID i
+	
+	// Add correct values to the new process at PID i
 	os_processes[freePID].state = OS_PS_READY;
 	os_processes[freePID].program= program;
 	os_processes[freePID].priority = priority;
 	os_resetProcessSchedulingInformation(freePID);
 	
-	//init stack
-	uint8_t *cur = (uint8_t *)PROCESS_STACK_BOTTOM(freePID);
+	// Find bottom of selected stack
+	uint8_t *cur = (uint8_t *)PROCESS_STACK_BOTTOM(freePID); 
+	
+	// Assign lower byte of program dispatcher pointer, and then higher byte 
 	*cur=(uintptr_t)os_dispatcher;
 	*(cur-1)=(uint8_t)((uintptr_t)os_dispatcher>>8);
 	
+	// Clear context
 	for(int i =2; i<35; i++){
 		*(cur-i)=0;
 	}
 	
+	// Set stack pointer to top of stack
 	os_processes[freePID].sp.as_ptr=cur-35;
-	//return pid
+	
+	// Calculate checksum
 	os_processes[freePID].checksum = os_getStackChecksum(freePID);
+	
 	os_leaveCriticalSection();
 	return freePID;
 }
