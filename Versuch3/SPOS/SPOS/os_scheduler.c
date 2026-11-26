@@ -81,7 +81,7 @@ ISR(TIMER2_COMPA_vect) {
 		os_taskManMain();
 	}
 
-	if (os_processes[currentProc].state == OS_PS_RUNNING) {
+	if (os_isRunnable(&os_processes[currentProc])) {
 		os_processes[currentProc].state = OS_PS_READY;
 	}
 	

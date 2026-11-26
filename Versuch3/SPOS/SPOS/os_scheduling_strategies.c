@@ -114,7 +114,7 @@ ProcessID os_Scheduler_Random(const Process processes[], ProcessID current) {
  *  \return The next process to be executed determined on the basis of the round robin strategy.
  */
 ProcessID os_Scheduler_RoundRobin(const Process processes[], ProcessID current) {
-    if (schedulingInfo.timeSlice > 1) { // Note: timeslice is not zero indexed
+    if (schedulingInfo.timeSlice > 1 && os_isRunnable(&processes[current])) { // Note: timeslice is not zero indexed
         schedulingInfo.timeSlice--;
         return current;
     }
@@ -148,9 +148,10 @@ ProcessID os_Scheduler_InactiveAging(const Process processes[], ProcessID curren
             schedulingInfo.age[i] += processes[i].priority;
             
             // If any of the three conditions are true, select as a candidate
-            if(schedulingInfo.age[i] > highestAge || // If it the oldest
+            if((schedulingInfo.age[i] > highestAge || // If it the oldest
                (schedulingInfo.age[i] == highestAge && processes[i].priority > highestPriority) || // If it is equally as old but lower priority
-               (schedulingInfo.age[i] == highestAge && processes[i].priority == highestPriority && i < candidate)) { // If it has both equal age and priority but lower PID
+               (schedulingInfo.age[i] == highestAge && processes[i].priority == highestPriority && i < candidate)) && // If it has both equal age and priority but lower PID
+			    os_isRunnable(&processes[current])) { // If it is still runnable 
                 highestAge = schedulingInfo.age[i];
                 highestPriority = processes[i].priority;
                 candidate = i;
