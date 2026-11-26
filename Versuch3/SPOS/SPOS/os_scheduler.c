@@ -69,14 +69,22 @@ void os_dispatcher(void);
  */
 ISR(TIMER2_COMPA_vect) {
 	saveContext();
+
+	// Save current stack pointer, and then set to bottom of stack
 	os_processes[currentProc].sp.as_int = SP;
 	SP = BOTTOM_OF_ISR_STACK;
 	os_processes[currentProc].checksum = os_getStackChecksum(currentProc);
+
+	// Opens task manager if Enter + Escape are pressed
 	if(os_getInput()==0b1001){
 		os_waitForNoInput();
 		os_taskManMain();
 	}
-	os_processes[currentProc].state=OS_PS_READY;
+
+	if (os_processes[currentProc].state == OS_PS_RUNNING) {
+		os_processes[currentProc].state = OS_PS_READY;
+	}
+	
 	switch (currentSS){
 		case OS_SS_RANDOM:
 		currentProc = os_Scheduler_Random(os_processes, currentProc);
@@ -97,9 +105,12 @@ ISR(TIMER2_COMPA_vect) {
 		currentProc = os_Scheduler_Even(os_processes, currentProc);
 		break;
 	}
+
+	// Evaluate if stack is still valid
 	if(os_getStackChecksum(currentProc)!=os_processes[currentProc].checksum){
 		os_error("invalid checksum");
 	}
+
 	os_processes[currentProc].state=OS_PS_RUNNING;
 	SP = os_processes[currentProc].sp.as_int;
 	restoreContext();
@@ -134,7 +145,8 @@ void idle(void){
 ProcessID os_exec(Program *program, Priority priority) {
 	os_enterCriticalSection();
 	
-	ProcessID freePID = INVALID_PROCESS;
+	// Default to nothing found
+	ProcessID freePID = INVALID_PROCESS; 
 	
 	// Search for free slot
 	for(int i=0; i<MAX_NUMBER_OF_PROCESSES; i++){
@@ -318,8 +330,8 @@ StackChecksum os_getStackChecksum(ProcessID pid) {
  *  \return True, if the killing process was successful
  */
 bool os_kill(ProcessID pid) {
-	// Prevent termination of idle process
-	if (pid == 0) return false;
+	// Prevent termination of idle or invalid process
+	if (pid == 0 || pid > (MAX_NUMBER_OF_PROCESSES - 1)) return false;
 
 	os_enterCriticalSection();
 	os_processes[pid].state = OS_PS_UNUSED;	// Clear process state
@@ -340,6 +352,8 @@ bool os_kill(ProcessID pid) {
 This wrapper enables the possibility to perfom a few necessary steps after the actual process function has finished.
 */
 void os_dispatcher (void) {
+
+	// Find and execute program belonging to current process
 	ProcessID pid = os_getCurrentProc();
 	Program *program = os_processes[pid].program;
 
