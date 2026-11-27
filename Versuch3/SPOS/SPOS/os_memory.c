@@ -150,6 +150,7 @@ MemAddr os_malloc (Heap* heap, size_t size) {
     // Catch failure of allocation
     if (start == 0) {
         os_leaveCriticalSection();
+		os_errorPStr(PSTR("no valid chunk available"));
         return 0;
     }
 
@@ -181,6 +182,7 @@ void os_freeOwnerRestricted (Heap* heap, MemAddr addr, ProcessID owner) {
     // Verify that the chunk belongs to the process
     if(os_getMapEntry(heap, start) != owner) {
         os_leaveCriticalSection();
+		os_errorPStr(PSTR("Processes tried freeing unowned chunk"));
         return;
     }
 

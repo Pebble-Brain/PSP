@@ -335,7 +335,7 @@ bool os_kill(ProcessID pid) {
 
 	os_enterCriticalSection();
 	os_processes[pid].state = OS_PS_UNUSED;	// Clear process state
-	os_freeProcessMemory(intHeap, pid); // Clear heap
+	//os_freeProcessMemory(intHeap, pid); // Clear heap
 
     if (pid == os_getCurrentProc()) { // For self-terminating processes
         while (criticalSectionCount > 0) os_leaveCriticalSection(); // Unwind all critical sections
