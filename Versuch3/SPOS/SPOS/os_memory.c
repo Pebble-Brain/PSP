@@ -150,7 +150,7 @@ MemAddr os_malloc (Heap* heap, size_t size) {
     // Catch failure of allocation
     if (start == 0) {
         os_leaveCriticalSection();
-		os_errorPStr(PSTR("no valid chunk available"));
+		os_errorPStr(PSTR("error: no chunk available"));
         return 0;
     }
 

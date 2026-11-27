@@ -17,7 +17,7 @@
 #define NUM_HEAPS 1
 
 //! Total heap size, rounded down to keep the heap below the process stacks.
-#define HEAP_TOTAL_SIZE (LOWEST_PROCESS_STACK_ADDRESS - (HEAPOFFSET + AVR_SRAM_START))
+#define HEAP_TOTAL_SIZE ((LOWEST_PROCESS_STACK_ADDRESS - (HEAPOFFSET + AVR_SRAM_START))-((LOWEST_PROCESS_STACK_ADDRESS - (HEAPOFFSET + AVR_SRAM_START)))%3)
 
 //! Map area size (1/3 of total, using integer division)
 #define HEAP_MAP_SIZE (HEAP_TOTAL_SIZE / 3)
